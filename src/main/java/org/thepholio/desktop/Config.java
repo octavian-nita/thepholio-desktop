@@ -11,9 +11,9 @@ import java.io.File;
  */
 public class Config {
 
-    public static final ObservableList<String> SAMPLES = getSamples();
+    public static final ObservableList<File> SAMPLES = getSamples();
 
-    public static ObservableList<String> getSamples() {
-        return FXCollections.observableArrayList(new File(Config.class.getResource("/samples").getPath()).list());
+    public static ObservableList<File> getSamples() {
+        return FXCollections.observableArrayList(new File(Config.class.getResource("/samples").getPath()).listFiles());
     }
 }
