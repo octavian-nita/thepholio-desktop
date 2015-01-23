@@ -33,11 +33,13 @@ public class Desktop extends Application {
         imageView.setSmooth(true);
         imageView.setCache(true);
 
-        StackPane stack = new StackPane(imageView);
-        ScrollPane scroll = new ScrollPane();
+        ScrollPane scroll = new ScrollPane() {
+
+            public void requestFocus() {}
+        };
         scroll.setPannable(true);
-        scroll.setContent(stack);
-        StackPane.setAlignment(imageView, Pos.CENTER);
+        scroll.setContent(new StackPane(imageView)); // allows content aligning and also centers it by default!
+        scroll.setFitToWidth(true);
 
         Text statusBar = new Text("Found " + SAMPLES.size() + " samples.");
         statusBar.setId("status");
