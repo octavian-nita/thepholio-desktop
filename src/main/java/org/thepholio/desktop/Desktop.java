@@ -1,7 +1,7 @@
 package org.thepholio.desktop;
 
 import javafx.application.Application;
-import javafx.embed.swing.SwingFXUtils;
+import javafx.embed.swing.SwingNode;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,8 +10,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionModel;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
@@ -19,9 +17,10 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 
 import static java.lang.Double.MAX_VALUE;
 import static javafx.scene.layout.Priority.ALWAYS;
@@ -29,16 +28,64 @@ import static org.thepholio.desktop.Config.SAMPLES;
 
 public class Desktop extends Application {
 
-    private ImageView imageView = new ImageView();
+    public static class SwingImageNode extends SwingNode {
+
+        private BufferedImage image;
+
+        private final JComponent ui = new JComponent() {
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (image != null) {
+                    g.drawImage(image, 0, 0, null);
+                }
+            }
+        };
+
+        public SwingImageNode() { setContent(ui); }
+
+        public void setImage(BufferedImage image) {
+            this.image = image;
+            SwingUtilities.invokeLater(() -> ui.repaint());
+        }
+
+        @Override
+        public boolean isResizable() { return false; }
+
+        @Override
+        public double minWidth(double height) { return image != null ? image.getWidth() : 0; }
+
+        @Override
+        public double maxWidth(double height) { return image != null ? image.getWidth() : 0; }
+
+        @Override
+        public double prefWidth(double height) { return image != null ? image.getWidth() : 0; }
+
+        @Override
+        public double minHeight(double width) { return image != null ? image.getHeight() : 0; }
+
+        @Override
+        public double maxHeight(double width) { return image != null ? image.getHeight() : 0; }
+
+        @Override
+        public double prefHeight(double width) { return image != null ? image.getHeight() : 0; }
+    }
+
+    private SwingImageNode imageNode = new SwingImageNode();
 
     private ComboBox samplesCB = new ComboBox();
 
     private Text statusBar = new Text();
 
+    private static final BufferedImage EMPTY_IMAGE = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+
+    @SuppressWarnings("unchecked")
     public Desktop() {
-        imageView.setPreserveRatio(true);
-        imageView.setSmooth(true);
-        imageView.setCache(true);
+        // imageNode.setPreserveRatio(true);
+        // imageNode.setSmooth(true);
+        imageNode.setCache(true);
+        // imageNode.setContent(...);
 
         samplesCB.setItems(SAMPLES);
         samplesCB.setMaxWidth(MAX_VALUE);
@@ -48,18 +95,19 @@ public class Desktop extends Application {
     }
 
     private void displaySelectedImage() {
-        @SuppressWarnings("unchecked") SelectionModel<File> selectionModel = samplesCB.getSelectionModel();
-        if (!selectionModel.isEmpty()) {
-            try {
-                imageView.setImage(getImage((selectionModel.getSelectedItem()).toURI().toURL()));
-            } catch (Exception e) {
-                statusBar.setText(e.getMessage());
-            }
+        @SuppressWarnings("unchecked") SelectionModel<File> selection = samplesCB.getSelectionModel();
+        if (!selection.isEmpty()) {
+            imageNode.setImage(loadSelectedImage(selection));
         }
     }
 
-    private Image getImage(URL url) throws IOException {
-        return SwingFXUtils.toFXImage(ImageIO.read(url), null);
+    private BufferedImage loadSelectedImage(SelectionModel<File> selection) {
+        try {
+            return ImageIO.read((selection.getSelectedItem()).toURI().toURL());
+        } catch (Exception e) {
+            statusBar.setText(e.getMessage());
+            return EMPTY_IMAGE;
+        }
     }
 
     @Override
@@ -71,7 +119,8 @@ public class Desktop extends Application {
         };
         scroll.setPannable(true);
         scroll.setFitToWidth(true);
-        scroll.setContent(new StackPane(imageView)); // allows content aligning and also centers it by default!
+        scroll.setFitToHeight(true);
+        scroll.setContent(new StackPane(imageNode)); // allows content aligning and also centers it by default!
 
         statusBar.setText("Found " + SAMPLES.size() + " samples.");
 
