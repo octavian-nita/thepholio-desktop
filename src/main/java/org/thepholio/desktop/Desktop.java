@@ -32,26 +32,23 @@ public class Desktop extends Application {
 
         private BufferedImage image;
 
-        private final JComponent ui = new JComponent() {
+        private final JComponent iv = new JPanel() {
 
             @Override
             protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
+                //super.paintComponent(g);
                 if (image != null) {
                     g.drawImage(image, 0, 0, null);
                 }
             }
         };
 
-        public SwingImageNode() { setContent(ui); }
+        public SwingImageNode() { setContent(iv); }
 
         public void setImage(BufferedImage image) {
             this.image = image;
-            SwingUtilities.invokeLater(() -> ui.repaint());
+            SwingUtilities.invokeLater(() -> { iv.repaint();});
         }
-
-        @Override
-        public boolean isResizable() { return false; }
 
         @Override
         public double minWidth(double height) { return image != null ? image.getWidth() : 0; }
@@ -60,7 +57,9 @@ public class Desktop extends Application {
         public double maxWidth(double height) { return image != null ? image.getWidth() : 0; }
 
         @Override
-        public double prefWidth(double height) { return image != null ? image.getWidth() : 0; }
+        public double prefWidth(double height) {
+            return image != null ? image.getWidth() : 0;
+        }
 
         @Override
         public double minHeight(double width) { return image != null ? image.getHeight() : 0; }
@@ -85,7 +84,6 @@ public class Desktop extends Application {
         // imageNode.setPreserveRatio(true);
         // imageNode.setSmooth(true);
         imageNode.setCache(true);
-        // imageNode.setContent(...);
 
         samplesCB.setItems(SAMPLES);
         samplesCB.setMaxWidth(MAX_VALUE);
