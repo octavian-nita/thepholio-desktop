@@ -1,7 +1,6 @@
 package org.thepholio.desktop;
 
 import javafx.application.Application;
-import javafx.embed.swing.SwingNode;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,59 +16,22 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Locale;
 
 import static java.lang.Double.MAX_VALUE;
+import static java.lang.String.format;
 import static javafx.scene.layout.Priority.ALWAYS;
 import static org.thepholio.desktop.Config.SAMPLES;
+import static org.thepholio.util.Stopwatch.SW;
 
+/**
+ * @author Octavian Theodor Nita (https://github.com/octavian-nita)
+ * @version 1.0, Jan 20, 2015
+ */
 public class Desktop extends Application {
-
-    public static class SwingImageNode extends SwingNode {
-
-        private BufferedImage image;
-
-        private final JComponent iv = new JPanel() {
-
-            @Override
-            protected void paintComponent(Graphics g) {
-                //super.paintComponent(g);
-                if (image != null) {
-                    g.drawImage(image, 0, 0, null);
-                }
-            }
-        };
-
-        public SwingImageNode() { setContent(iv); }
-
-        public void setImage(BufferedImage image) {
-            this.image = image;
-            SwingUtilities.invokeLater(() -> { iv.repaint();});
-        }
-
-        @Override
-        public double minWidth(double height) { return image != null ? image.getWidth() : 0; }
-
-        @Override
-        public double maxWidth(double height) { return image != null ? image.getWidth() : 0; }
-
-        @Override
-        public double prefWidth(double height) {
-            return image != null ? image.getWidth() : 0;
-        }
-
-        @Override
-        public double minHeight(double width) { return image != null ? image.getHeight() : 0; }
-
-        @Override
-        public double maxHeight(double width) { return image != null ? image.getHeight() : 0; }
-
-        @Override
-        public double prefHeight(double width) { return image != null ? image.getHeight() : 0; }
-    }
 
     private SwingImageNode imageNode = new SwingImageNode();
 
@@ -77,13 +39,13 @@ public class Desktop extends Application {
 
     private Text statusBar = new Text();
 
-    private static final BufferedImage EMPTY_IMAGE = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+    private static final BufferedImage EMPTY_IMAGE =
+        GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration()
+                           .createCompatibleImage(1, 1);
 
     @SuppressWarnings("unchecked")
     public Desktop() {
-        // imageNode.setPreserveRatio(true);
-        // imageNode.setSmooth(true);
-        imageNode.setCache(true);
+        //imageNode.setCache(true);
 
         samplesCB.setItems(SAMPLES);
         samplesCB.setMaxWidth(MAX_VALUE);
@@ -95,13 +57,24 @@ public class Desktop extends Application {
     private void displaySelectedImage() {
         @SuppressWarnings("unchecked") SelectionModel<File> selection = samplesCB.getSelectionModel();
         if (!selection.isEmpty()) {
-            imageNode.setImage(loadSelectedImage(selection));
+
+            File file = selection.getSelectedItem();
+            double sizeKB = Math.round((file.length() / 1024.) * 100.) / 100.;
+
+            SW.start();
+            BufferedImage image = loadImage(file);
+            long millisLoaded = SW.stop().elapsed();
+
+            imageNode.setImage(image);
+            statusBar.setText(
+                format(Locale.ENGLISH, "%d x %d  |  %.2fKB  |  loaded in %dms", image.getWidth(), image.getHeight(),
+                       sizeKB, millisLoaded));
         }
     }
 
-    private BufferedImage loadSelectedImage(SelectionModel<File> selection) {
+    private BufferedImage loadImage(File imageFile) {
         try {
-            return ImageIO.read((selection.getSelectedItem()).toURI().toURL());
+            return ImageIO.read(imageFile);
         } catch (Exception e) {
             statusBar.setText(e.getMessage());
             return EMPTY_IMAGE;
