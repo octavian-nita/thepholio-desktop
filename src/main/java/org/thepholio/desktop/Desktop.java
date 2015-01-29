@@ -45,8 +45,6 @@ public class Desktop extends Application {
 
     @SuppressWarnings("unchecked")
     public Desktop() {
-        //imageNode.setCache(true);
-
         samplesCB.setItems(SAMPLES);
         samplesCB.setMaxWidth(MAX_VALUE);
         samplesCB.setOnAction(event -> displaySelectedImage());
@@ -54,12 +52,20 @@ public class Desktop extends Application {
         statusBar.setId("status");
     }
 
+    private static String size(double numBytes) {
+        String kbmb = "KB";
+        double size = numBytes / 1024.;
+        if (Double.compare(size, 1024.) >= 0) {
+            size /= 1024.;
+            kbmb = "MB";
+        }
+        return format("%.2f %s", size, kbmb);
+    }
+
     private void displaySelectedImage() {
         @SuppressWarnings("unchecked") SelectionModel<File> selection = samplesCB.getSelectionModel();
         if (!selection.isEmpty()) {
-
             File file = selection.getSelectedItem();
-            double sizeKB = Math.round((file.length() / 1024.) * 100.) / 100.;
 
             SW.start();
             BufferedImage image = loadImage(file);
@@ -67,8 +73,9 @@ public class Desktop extends Application {
 
             imageNode.setImage(image);
             statusBar.setText(
-                format(Locale.ENGLISH, "%d x %d  |  %.2fKB  |  loaded in %dms", image.getWidth(), image.getHeight(),
-                       sizeKB, millisLoaded));
+                format(Locale.ENGLISH, "%d x %d  |  %s in memory  |  %s on disk  |  loaded in %d ms", image.getWidth(),
+                       image.getHeight(), size(image.getData().getDataBuffer().getSize()), size(file.length()),
+                       millisLoaded));
         }
     }
 
