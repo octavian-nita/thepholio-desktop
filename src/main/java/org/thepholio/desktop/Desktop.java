@@ -18,6 +18,7 @@ import javafx.stage.Stage;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
 import java.io.File;
 import java.util.Locale;
 
@@ -71,11 +72,13 @@ public class Desktop extends Application {
             BufferedImage image = loadImage(file);
             long millisLoaded = SW.stop().elapsed();
 
+            DataBuffer dataBuffer = image.getData().getDataBuffer();
+            int bytes = DataBuffer.getDataTypeSize(dataBuffer.getDataType()) * dataBuffer.getSize();
+
             imageNode.setImage(image);
             statusBar.setText(
                 format(Locale.ENGLISH, "%d x %d  |  %s in memory  |  %s on disk  |  loaded in %d ms", image.getWidth(),
-                       image.getHeight(), size(image.getData().getDataBuffer().getSize()), size(file.length()),
-                       millisLoaded));
+                       image.getHeight(), size(bytes), size(file.length()), millisLoaded));
         }
     }
 
