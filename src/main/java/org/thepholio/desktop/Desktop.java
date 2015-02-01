@@ -16,7 +16,6 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.io.File;
@@ -25,7 +24,9 @@ import java.util.Locale;
 import static java.lang.Double.MAX_VALUE;
 import static java.lang.String.format;
 import static javafx.scene.layout.Priority.ALWAYS;
-import static org.thepholio.desktop.Config.SAMPLES;
+import static org.thepholio.desktop.Utils.EMPTY_IMAGE;
+import static org.thepholio.desktop.Utils.SAMPLES;
+import static org.thepholio.desktop.Utils.hrSize;
 import static org.thepholio.util.Stopwatch.SW;
 
 /**
@@ -40,10 +41,6 @@ public class Desktop extends Application {
 
     private Text statusBar = new Text();
 
-    private static final BufferedImage EMPTY_IMAGE =
-        GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration()
-                           .createCompatibleImage(1, 1);
-
     @SuppressWarnings("unchecked")
     public Desktop() {
         samplesCB.setItems(SAMPLES);
@@ -51,16 +48,6 @@ public class Desktop extends Application {
         samplesCB.setOnAction(event -> displaySelectedImage());
 
         statusBar.setId("status");
-    }
-
-    private static String size(double numBytes) {
-        String kbmb = "KB";
-        double size = numBytes / 1024.;
-        if (Double.compare(size, 1024.) >= 0) {
-            size /= 1024.;
-            kbmb = "MB";
-        }
-        return format("%.2f %s", size, kbmb);
     }
 
     private void displaySelectedImage() {
@@ -72,13 +59,13 @@ public class Desktop extends Application {
             BufferedImage image = loadImage(file);
             long millisLoaded = SW.stop().elapsed();
 
-            DataBuffer dataBuffer = image.getData().getDataBuffer();
-            int bytes = DataBuffer.getDataTypeSize(dataBuffer.getDataType()) * dataBuffer.getSize();
+            DataBuffer buffer = image.getRaster().getDataBuffer();
+            int bytes = buffer.getSize() * DataBuffer.getDataTypeSize(buffer.getDataType()) / 8;
 
             imageNode.setImage(image);
             statusBar.setText(
                 format(Locale.ENGLISH, "%d x %d  |  %s in memory  |  %s on disk  |  loaded in %d ms", image.getWidth(),
-                       image.getHeight(), size(bytes), size(file.length()), millisLoaded));
+                       image.getHeight(), hrSize(bytes), hrSize(file.length()), millisLoaded));
         }
     }
 
