@@ -16,23 +16,8 @@ public class SwingImageNode extends SwingNode {
 
     private volatile BufferedImage image;
 
-    private BufferedImage optimize(BufferedImage image) {
-        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        GraphicsConfiguration gc = gd.getDefaultConfiguration();
-
-        boolean isTransparent = image.getColorModel().hasAlpha();
-
-        BufferedImage img2 = gc.createCompatibleImage(image.getWidth(), image.getHeight(),
-                                                      isTransparent ? Transparency.BITMASK : Transparency.OPAQUE);
-        Graphics2D g = img2.createGraphics();
-        g.drawImage(image, 0, 0, null);
-        g.dispose();
-
-        return img2;
-    }
-
     public void setImage(BufferedImage image) {
-        this.image = optimize(image);
+        this.image = image;
         setContent(new JComponent() {
 
             @Override
