@@ -18,15 +18,19 @@ import javafx.stage.Stage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
+import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
 import java.awt.image.DataBuffer;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Locale;
 
+import static java.awt.color.ColorSpace.CS_sRGB;
 import static java.lang.Double.MAX_VALUE;
 import static java.lang.String.format;
 import static javafx.scene.layout.Priority.ALWAYS;
@@ -61,53 +65,49 @@ public class Desktop extends Application {
         if (!selection.isEmpty()) {
             File file = selection.getSelectedItem();
 
-            SW.start();
-            BufferedImage image = loadImage(file);
-            long millisLoaded = SW.stop().elapsed();
+            BufferedImage image;
+            try {
+                SW.start();
+                image = loadImage(file);
+                long millisLoaded = SW.stop().elapsed();
 
-            DataBuffer buffer = image.getRaster().getDataBuffer();
-            int bytes = buffer.getSize() * DataBuffer.getDataTypeSize(buffer.getDataType()) / 8;
+                DataBuffer buffer = image.getRaster().getDataBuffer();
+                int bytes = buffer.getSize() * DataBuffer.getDataTypeSize(buffer.getDataType()) / 8;
 
-            imageNode.setImage(image);
-            statusBar.setText(format(Locale.ENGLISH, "%d x %d  |  %s in memory  |  %s on disk  |  loaded in %d ms  ",
-                                     image.getWidth(), image.getHeight(), hrSize(bytes), hrSize(file.length()),
-                                     millisLoaded));
+                imageNode.setImage(image);
+                statusBar.setText(
+                    format(Locale.ENGLISH, "%d x %d  |  %s in memory  |  %s on disk  |  loaded in %d ms  ",
+                           image.getWidth(), image.getHeight(), hrSize(bytes), hrSize(file.length()), millisLoaded));
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+                statusBar.setText("Error loading image!");
+                imageNode.setImage(EMPTY_IMAGE);
+            }
         }
     }
 
-    private BufferedImage loadImage(File imageFile) {
+    private BufferedImage loadImage(File imageFile) throws Exception {
         ImageInputStream input = null;
         try {
             input = ImageIO.createImageInputStream(imageFile);
 
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
-            if (!readers.hasNext()) {
+            Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(input);
+            if (!imageReaders.hasNext()) {
                 throw new IllegalArgumentException("No reader for " + imageFile);
             }
 
-            ImageReader reader = readers.next();
+            ImageReader reader = imageReaders.next();
 
             try {
                 reader.setInput(input);
-
-                ImageReadParam param = reader.getDefaultReadParam();
-                BufferedImage im =
+                BufferedImage image =
                     GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration()
-                                       .createCompatibleImage(reader.getWidth(0), reader.getHeight(0), Transparency.OPAQUE);
-                param.setDestination(im);
+                                       .createCompatibleImage(reader.getWidth(0), reader.getHeight(0));
 
-                im = reader.read(0, param);
-                System.out.println(im.getWidth());
-                return im;
-            } catch (Throwable th) {
-                statusBar.setText(th.getMessage());
-                return EMPTY_IMAGE;
+                return new ColorConvertOp(ColorSpace.getInstance(CS_sRGB), null).filter(reader.read(0), image);
             } finally {
                 reader.dispose();
             }
-        } catch (Exception e) {
-            statusBar.setText(e.getMessage());
-            return EMPTY_IMAGE;
         } finally {
             if (input != null) {
                 try {

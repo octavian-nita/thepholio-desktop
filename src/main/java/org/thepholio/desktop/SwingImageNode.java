@@ -2,9 +2,12 @@ package org.thepholio.desktop;
 
 import javafx.embed.swing.SwingNode;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JComponent;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+
+import static org.thepholio.desktop.Utils.NO_SIZE;
 
 /**
  * @author Octavian Theodor Nita (https://github.com/octavian-nita)
@@ -12,33 +15,37 @@ import java.awt.image.BufferedImage;
  */
 public class SwingImageNode extends SwingNode {
 
-    private static final Dimension NO_SIZE = new Dimension();
+    private final JComponent imageView = new JComponent() {
+
+        {
+            setOpaque(true);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if (image != null) {
+                g.drawImage(image, 0, 0, null);
+            }
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return image != null ? new Dimension(image.getWidth(), image.getHeight()) : NO_SIZE;
+        }
+
+        @Override
+        public Dimension getMinimumSize() { return getPreferredSize(); }
+
+        @Override
+        public Dimension getMaximumSize() { return getPreferredSize(); }
+    };
 
     private volatile BufferedImage image;
 
     public void setImage(BufferedImage image) {
         this.image = image;
-        setContent(new JComponent() {
-
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                if (image != null) {
-                    g.drawImage(image, 0, 0, null);
-                }
-            }
-
-            @Override
-            public Dimension getPreferredSize() {
-                return image != null ? new Dimension(image.getWidth(), image.getHeight()) : NO_SIZE;
-            }
-
-            @Override
-            public Dimension getMinimumSize() { return getPreferredSize(); }
-
-            @Override
-            public Dimension getMaximumSize() { return getPreferredSize(); }
-        });
+        setContent(imageView); // no need to re-create the Swing component, just force re-validate / repaint
     }
 
     @Override
