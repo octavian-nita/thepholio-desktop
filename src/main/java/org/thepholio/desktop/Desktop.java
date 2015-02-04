@@ -16,9 +16,15 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
 import java.util.Locale;
 
 import static java.lang.Double.MAX_VALUE;
@@ -63,18 +69,53 @@ public class Desktop extends Application {
             int bytes = buffer.getSize() * DataBuffer.getDataTypeSize(buffer.getDataType()) / 8;
 
             imageNode.setImage(image);
-            statusBar.setText(
-                format(Locale.ENGLISH, "%d x %d  |  %s in memory  |  %s on disk  |  loaded in %d ms", image.getWidth(),
-                       image.getHeight(), hrSize(bytes), hrSize(file.length()), millisLoaded));
+            statusBar.setText(format(Locale.ENGLISH, "%d x %d  |  %s in memory  |  %s on disk  |  loaded in %d ms  ",
+                                     image.getWidth(), image.getHeight(), hrSize(bytes), hrSize(file.length()),
+                                     millisLoaded));
         }
     }
 
     private BufferedImage loadImage(File imageFile) {
+        ImageInputStream input = null;
         try {
-            return ImageIO.read(imageFile);
+            input = ImageIO.createImageInputStream(imageFile);
+
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
+            if (!readers.hasNext()) {
+                throw new IllegalArgumentException("No reader for " + imageFile);
+            }
+
+            ImageReader reader = readers.next();
+
+            try {
+                reader.setInput(input);
+
+                ImageReadParam param = reader.getDefaultReadParam();
+                BufferedImage im =
+                    GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration()
+                                       .createCompatibleImage(reader.getWidth(0), reader.getHeight(0), Transparency.OPAQUE);
+                param.setDestination(im);
+
+                im = reader.read(0, param);
+                System.out.println(im.getWidth());
+                return im;
+            } catch (Throwable th) {
+                statusBar.setText(th.getMessage());
+                return EMPTY_IMAGE;
+            } finally {
+                reader.dispose();
+            }
         } catch (Exception e) {
             statusBar.setText(e.getMessage());
             return EMPTY_IMAGE;
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
