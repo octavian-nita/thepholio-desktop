@@ -20,10 +20,12 @@ import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.stream.ImageInputStream;
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.GraphicsEnvironment;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
+import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.io.File;
 import java.io.IOException;
@@ -100,11 +102,16 @@ public class Desktop extends Application {
 
             try {
                 reader.setInput(input);
-                BufferedImage image =
-                    GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration()
-                                       .createCompatibleImage(reader.getWidth(0), reader.getHeight(0));
 
-                return new ColorConvertOp(ColorSpace.getInstance(CS_sRGB), null).filter(reader.read(0), image);
+                BufferedImage image = reader.read(0);
+                    //GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration()
+                    //                   .createCompatibleImage(reader.getWidth(0), reader.getHeight(0));
+
+                // ImageReadParam param = reader.getDefaultReadParam();
+                // param.setDestination(image);
+                // param.setDestinationType(ImageTypeSpecifier.createFromBufferedImageType(image.getType()));
+                //new ColorConvertOp(ColorSpace.getInstance(CS_sRGB), null).filter(image, image);
+                return makeCompatible(image);
             } finally {
                 reader.dispose();
             }
@@ -117,6 +124,42 @@ public class Desktop extends Application {
                 }
             }
         }
+    }
+
+    public static BufferedImage makeCompatible(BufferedImage img) throws IOException {
+        // Allocate the new image
+        BufferedImage dstImage = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+
+        // Check if the ColorSpace is RGB and the TransferType is BYTE.
+        // Otherwise this fast method does not work as expected
+        ColorModel cm = img.getColorModel();
+        if ( cm.getColorSpace().getType() == ColorSpace.TYPE_RGB && img.getRaster().getTransferType() == DataBuffer.TYPE_BYTE ) {
+            //Allocate arrays
+            int len = img.getWidth()*img.getHeight();
+            byte[] src = new byte[len*3];
+            int[] dst = new int[len];
+
+            // Read the src image data into the array
+            img.getRaster().getDataElements(0, 0, img.getWidth(), img.getHeight(), src);
+
+            // Convert to INT_RGB
+            int j = 0;
+            for ( int i=0; i<len; i++ ) {
+                dst[i] = (((int)src[j++] & 0xFF) << 16) |
+                         (((int)src[j++] & 0xFF) << 8) |
+                         (((int)src[j++] & 0xFF));
+            }
+
+            // Set the dst image data
+            dstImage.getRaster().setDataElements(0, 0, img.getWidth(), img.getHeight(), dst);
+
+            return dstImage;
+        }
+
+        ColorConvertOp op = new ColorConvertOp(null);
+        op.filter(img, dstImage);
+
+        return dstImage;
     }
 
     @Override
