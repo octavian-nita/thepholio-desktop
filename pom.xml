@@ -16,38 +16,49 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     <sun.java2d.cmm>sun.java2d.cmm.kcms.KcmsServiceProvider</sun.java2d.cmm>
+    <twelvemonkeys.version>3.1-SNAPSHOT</twelvemonkeys.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.twelvemonkeys.imageio</groupId>
       <artifactId>imageio-jpeg</artifactId>
-      <version>3.0.2</version>
+      <version>${twelvemonkeys.version}</version>
     </dependency>
     <dependency>
       <groupId>com.twelvemonkeys.imageio</groupId>
       <artifactId>imageio-tiff</artifactId>
-      <version>3.0.2</version>
+      <version>${twelvemonkeys.version}</version>
     </dependency>
     <dependency>
       <groupId>com.twelvemonkeys.imageio</groupId>
       <artifactId>imageio-psd</artifactId>
-      <version>3.0.2</version>
+      <version>${twelvemonkeys.version}</version>
     </dependency>
     <dependency>
       <groupId>com.twelvemonkeys.imageio</groupId>
-      <artifactId>imageio-pict</artifactId>
-      <version>3.0.2</version>
+      <artifactId>imageio-tga</artifactId>
+      <version>${twelvemonkeys.version}</version>
     </dependency>
     <dependency>
       <groupId>com.twelvemonkeys.imageio</groupId>
-      <artifactId>imageio-iff</artifactId>
-      <version>3.0.2</version>
+      <artifactId>imageio-thumbsdb</artifactId>
+      <version>${twelvemonkeys.version}</version>
     </dependency>
     <dependency>
       <groupId>com.twelvemonkeys.imageio</groupId>
-      <artifactId>imageio-icns</artifactId>
-      <version>3.0.2</version>
+      <artifactId>imageio-bmp</artifactId>
+      <version>${twelvemonkeys.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twelvemonkeys.imageio</groupId>
+      <artifactId>imageio-pnm</artifactId>
+      <version>${twelvemonkeys.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twelvemonkeys.imageio</groupId>
+      <artifactId>imageio-pcx</artifactId>
+      <version>${twelvemonkeys.version}</version>
     </dependency>
     <dependency>
       <groupId>com.twelvemonkeys.imageio</groupId>
@@ -56,8 +67,33 @@
     </dependency>
     <dependency>
       <groupId>com.twelvemonkeys.imageio</groupId>
-      <artifactId>imageio-thumbsdb</artifactId>
-      <version>3.0.2</version>
+      <artifactId>imageio-icns</artifactId>
+      <version>${twelvemonkeys.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twelvemonkeys.imageio</groupId>
+      <artifactId>imageio-pdf</artifactId>
+      <version>${twelvemonkeys.version}</version>
+    </dependency>
+    <!--dependency>
+      <groupId>com.twelvemonkeys.imageio</groupId>
+      <artifactId>imageio-batik</artifactId>
+      <version>${twelvemonkeys.version}</version>
+    </dependency-->
+    <dependency>
+      <groupId>com.twelvemonkeys.imageio</groupId>
+      <artifactId>imageio-pict</artifactId>
+      <version>${twelvemonkeys.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twelvemonkeys.imageio</groupId>
+      <artifactId>imageio-iff</artifactId>
+      <version>${twelvemonkeys.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twelvemonkeys.imageio</groupId>
+      <artifactId>imageio-sgi</artifactId>
+      <version>${twelvemonkeys.version}</version>
     </dependency>
   </dependencies>
 

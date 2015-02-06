@@ -7,7 +7,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import static org.thepholio.desktop.Utils.NO_SIZE;
+import static org.thepholio.util.Utils.NO_SIZE;
 
 /**
  * @author Octavian Theodor Nita (https://github.com/octavian-nita)

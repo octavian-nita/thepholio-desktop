@@ -14,32 +14,21 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import org.thepholio.util.Images;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.stream.ImageInputStream;
-import java.awt.Graphics;
-import java.awt.GraphicsEnvironment;
-import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorConvertOp;
-import java.awt.image.ColorModel;
-import java.awt.image.DataBuffer;
 import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.Locale;
 
-import static java.awt.color.ColorSpace.CS_sRGB;
 import static java.lang.Double.MAX_VALUE;
 import static java.lang.String.format;
 import static javafx.scene.layout.Priority.ALWAYS;
-import static org.thepholio.desktop.Utils.EMPTY_IMAGE;
-import static org.thepholio.desktop.Utils.SAMPLES;
-import static org.thepholio.desktop.Utils.hrSize;
+import static org.thepholio.util.Images.size;
 import static org.thepholio.util.Stopwatch.SW;
+import static org.thepholio.util.Utils.EMPTY_IMAGE;
+import static org.thepholio.util.Utils.SAMPLES;
+import static org.thepholio.util.Utils.hrSize;
+import static org.thepholio.util.Utils.hrTime;
 
 /**
  * @author Octavian Theodor Nita (https://github.com/octavian-nita)
@@ -58,7 +47,6 @@ public class Desktop extends Application {
         samplesCB.setItems(SAMPLES);
         samplesCB.setMaxWidth(MAX_VALUE);
         samplesCB.setOnAction(event -> displaySelectedImage());
-
         statusBar.setId("status");
     }
 
@@ -70,96 +58,19 @@ public class Desktop extends Application {
             BufferedImage image;
             try {
                 SW.start();
-                image = loadImage(file);
+                image = Images.load(file);
                 long millisLoaded = SW.stop().elapsed();
 
-                DataBuffer buffer = image.getRaster().getDataBuffer();
-                int bytes = buffer.getSize() * DataBuffer.getDataTypeSize(buffer.getDataType()) / 8;
-
                 imageNode.setImage(image);
-                statusBar.setText(
-                    format(Locale.ENGLISH, "%d x %d  |  %s in memory  |  %s on disk  |  loaded in %d ms  ",
-                           image.getWidth(), image.getHeight(), hrSize(bytes), hrSize(file.length()), millisLoaded));
+                statusBar.setText(format(Locale.ENGLISH, "%d x %d  |  %s in memory  |  %s on disk  |  loaded in %s  ",
+                                         image.getWidth(), image.getHeight(), hrSize(size(image)),
+                                         hrSize(file.length()), hrTime(millisLoaded)));
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
                 statusBar.setText("Error loading image!");
                 imageNode.setImage(EMPTY_IMAGE);
             }
         }
-    }
-
-    private BufferedImage loadImage(File imageFile) throws Exception {
-        ImageInputStream input = null;
-        try {
-            input = ImageIO.createImageInputStream(imageFile);
-
-            Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(input);
-            if (!imageReaders.hasNext()) {
-                throw new IllegalArgumentException("No reader for " + imageFile);
-            }
-
-            ImageReader reader = imageReaders.next();
-
-            try {
-                reader.setInput(input);
-
-                BufferedImage image = reader.read(0);
-                    //GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration()
-                    //                   .createCompatibleImage(reader.getWidth(0), reader.getHeight(0));
-
-                // ImageReadParam param = reader.getDefaultReadParam();
-                // param.setDestination(image);
-                // param.setDestinationType(ImageTypeSpecifier.createFromBufferedImageType(image.getType()));
-                //new ColorConvertOp(ColorSpace.getInstance(CS_sRGB), null).filter(image, image);
-                return makeCompatible(image);
-            } finally {
-                reader.dispose();
-            }
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    public static BufferedImage makeCompatible(BufferedImage img) throws IOException {
-        // Allocate the new image
-        BufferedImage dstImage = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
-
-        // Check if the ColorSpace is RGB and the TransferType is BYTE.
-        // Otherwise this fast method does not work as expected
-        ColorModel cm = img.getColorModel();
-        if ( cm.getColorSpace().getType() == ColorSpace.TYPE_RGB && img.getRaster().getTransferType() == DataBuffer.TYPE_BYTE ) {
-            //Allocate arrays
-            int len = img.getWidth()*img.getHeight();
-            byte[] src = new byte[len*3];
-            int[] dst = new int[len];
-
-            // Read the src image data into the array
-            img.getRaster().getDataElements(0, 0, img.getWidth(), img.getHeight(), src);
-
-            // Convert to INT_RGB
-            int j = 0;
-            for ( int i=0; i<len; i++ ) {
-                dst[i] = (((int)src[j++] & 0xFF) << 16) |
-                         (((int)src[j++] & 0xFF) << 8) |
-                         (((int)src[j++] & 0xFF));
-            }
-
-            // Set the dst image data
-            dstImage.getRaster().setDataElements(0, 0, img.getWidth(), img.getHeight(), dst);
-
-            return dstImage;
-        }
-
-        ColorConvertOp op = new ColorConvertOp(null);
-        op.filter(img, dstImage);
-
-        return dstImage;
     }
 
     @Override
