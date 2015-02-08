@@ -1,6 +1,8 @@
 package org.thepholio.desktop;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.geometry.Bounds;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,11 +12,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import org.thepholio.util.Images;
+import org.thepholio.image.Images;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -23,9 +26,8 @@ import java.util.Locale;
 import static java.lang.Double.MAX_VALUE;
 import static java.lang.String.format;
 import static javafx.scene.layout.Priority.ALWAYS;
-import static org.thepholio.util.Images.size;
+import static org.thepholio.image.Images.size;
 import static org.thepholio.util.Stopwatch.SW;
-import static org.thepholio.util.Utils.EMPTY_IMAGE;
 import static org.thepholio.util.Utils.SAMPLES;
 import static org.thepholio.util.Utils.hrSize;
 import static org.thepholio.util.Utils.hrTime;
@@ -68,7 +70,7 @@ public class Desktop extends Application {
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
                 statusBar.setText("Error loading image!");
-                imageNode.setImage(EMPTY_IMAGE);
+                imageNode.setImage(Images.EMPTY_IMAGE);
             }
         }
     }
@@ -83,7 +85,8 @@ public class Desktop extends Application {
         scroll.setPannable(true);
         scroll.setFitToWidth(true);
         scroll.setFitToHeight(true);
-        scroll.setContent(new StackPane(imageNode)); // allows content aligning and also centers it by default!
+        final StackPane stack = new StackPane(imageNode);
+        scroll.setContent(stack); // allows content aligning and also centers it by default!
 
         statusBar.setText("Found " + SAMPLES.size() + " samples.");
 

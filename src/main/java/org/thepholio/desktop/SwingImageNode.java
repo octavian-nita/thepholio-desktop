@@ -7,13 +7,13 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import static org.thepholio.util.Utils.NO_SIZE;
-
 /**
  * @author Octavian Theodor Nita (https://github.com/octavian-nita)
  * @version 1.0, Jan 27, 2015
  */
 public class SwingImageNode extends SwingNode {
+
+    public static final Dimension NO_SIZE = new Dimension();
 
     private final JComponent imageView = new JComponent() {
 

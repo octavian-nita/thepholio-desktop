@@ -3,10 +3,6 @@ package org.thepholio.util;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.awt.Dimension;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsEnvironment;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
@@ -20,13 +16,6 @@ import static java.lang.String.format;
  * @version 1.0, Jan 21, 2015
  */
 public class Utils {
-
-    public static final GraphicsConfiguration GRAPHICS_CONFIGURATION =
-        GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
-
-    public static final BufferedImage EMPTY_IMAGE = GRAPHICS_CONFIGURATION.createCompatibleImage(1, 1);
-
-    public static final Dimension NO_SIZE = new Dimension();
 
     public static final ObservableList<File> SAMPLES = getSamples();
 
