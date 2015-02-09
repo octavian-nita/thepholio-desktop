@@ -1,8 +1,7 @@
 package org.thepholio.desktop;
 
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.geometry.Bounds;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,8 +10,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionModel;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
@@ -38,57 +37,47 @@ import static org.thepholio.util.Utils.hrTime;
  */
 public class Desktop extends Application {
 
-    private SwingImageNode imageNode = new SwingImageNode();
+    private ImageView imageView = new ImageView();
 
     private ComboBox samplesCB = new ComboBox();
 
     private Text statusBar = new Text();
 
-    @SuppressWarnings("unchecked")
     public Desktop() {
         samplesCB.setItems(SAMPLES);
         samplesCB.setMaxWidth(MAX_VALUE);
         samplesCB.setOnAction(event -> displaySelectedImage());
+
         statusBar.setId("status");
+        statusBar.setText("Found " + SAMPLES.size() + " samples.");
+
     }
 
     private void displaySelectedImage() {
+
         @SuppressWarnings("unchecked") SelectionModel<File> selection = samplesCB.getSelectionModel();
         if (!selection.isEmpty()) {
             File file = selection.getSelectedItem();
 
-            BufferedImage image;
             try {
                 SW.start();
-                image = Images.load(file);
+                BufferedImage image = Images.load(file);
                 long millisLoaded = SW.stop().elapsed();
 
-                imageNode.setImage(image);
+                imageView.setImage(SwingFXUtils.toFXImage(image, null));
                 statusBar.setText(format(Locale.ENGLISH, "%d x %d  |  %s in memory  |  %s on disk  |  loaded in %s  ",
                                          image.getWidth(), image.getHeight(), hrSize(size(image)),
                                          hrSize(file.length()), hrTime(millisLoaded)));
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
                 statusBar.setText("Error loading image!");
-                imageNode.setImage(Images.EMPTY_IMAGE);
+                //imageView.setImage(Images.EMPTY_IMAGE);
             }
         }
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
-        ScrollPane scroll = new ScrollPane() {
-
-            public void requestFocus() {}
-        };
-        scroll.setPannable(true);
-        scroll.setFitToWidth(true);
-        scroll.setFitToHeight(true);
-        final StackPane stack = new StackPane(imageNode);
-        scroll.setContent(stack); // allows content aligning and also centers it by default!
-
-        statusBar.setText("Found " + SAMPLES.size() + " samples.");
 
         GridPane root = new GridPane();
         root.setPadding(new Insets(4));
@@ -99,10 +88,6 @@ public class Desktop extends Application {
 
         root.add(samplesCB, 0, 0);
         GridPane.setHgrow(samplesCB, ALWAYS);
-
-        root.add(scroll, 0, 1);
-        GridPane.setHgrow(scroll, ALWAYS);
-        GridPane.setVgrow(scroll, ALWAYS);
 
         root.add(statusBar, 0, 2);
         GridPane.setHgrow(statusBar, ALWAYS);
@@ -117,6 +102,19 @@ public class Desktop extends Application {
         primaryStage.show();
 
         samplesCB.getSelectionModel().select(0);
+
+        ScrollPane scroll = new ScrollPane() {
+
+            public void requestFocus() {}
+        };
+        scroll.setPannable(true);
+        scroll.setFitToWidth(true);
+        scroll.setFitToHeight(true);
+        scroll.setContent(new StackPane(imageView)); // allows content aligning and also centers it by default!
+
+        root.add(scroll, 0, 1);
+        GridPane.setHgrow(scroll, ALWAYS);
+        GridPane.setVgrow(scroll, ALWAYS);
     }
 
     public static void main(String[] args) {

@@ -5,9 +5,9 @@ import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.stream.ImageInputStream;
-import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
 import java.awt.image.DataBuffer;
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +26,11 @@ public class Images {
 
     public static final BufferedImage EMPTY_IMAGE = GRAPHICS_CONFIGURATION.createCompatibleImage(1, 1);
 
+    public static final ColorConvertOp COLOR_CONVERTER = new ColorConvertOp(null);
+
+    /**
+     * @return the size (in bytes) the provided <code>image</code> occupies in memory
+     */
     public static int size(BufferedImage image) {
         if (image == null) {
             return 0;
@@ -69,17 +74,11 @@ public class Images {
                     reader.read(0, param);
                 } else {
                     BufferedImage imageToConvert = reader.read(0);
-
-                    Graphics g = image.getGraphics();
-                    g.drawImage(imageToConvert, 0, 0, null);
-                    g.dispose();
-
+                    COLOR_CONVERTER.filter(imageToConvert, image);
                     imageToConvert.flush();
                 }
 
                 return image;
-                //new ColorConvertOp(ColorSpace.getInstance(CS_sRGB), null).filter(image, image);
-                //return makeCompatible(image);
             } finally {
                 reader.dispose();
             }
