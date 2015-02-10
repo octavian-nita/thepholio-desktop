@@ -44,13 +44,14 @@ public class Desktop extends Application {
     private Text statusBar = new Text();
 
     public Desktop() {
+        imageView.setCache(true);
+
         samplesCB.setItems(SAMPLES);
         samplesCB.setMaxWidth(MAX_VALUE);
         samplesCB.setOnAction(event -> displaySelectedImage());
 
         statusBar.setId("status");
         statusBar.setText("Found " + SAMPLES.size() + " samples.");
-
     }
 
     private void displaySelectedImage() {
@@ -71,7 +72,7 @@ public class Desktop extends Application {
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
                 statusBar.setText("Error loading image!");
-                //imageView.setImage(Images.EMPTY_IMAGE);
+                imageView.setImage(null);
             }
         }
     }
