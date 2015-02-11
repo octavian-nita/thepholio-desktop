@@ -1,4 +1,4 @@
-package org.thepholio.util;
+package org.thepholio.desktop;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

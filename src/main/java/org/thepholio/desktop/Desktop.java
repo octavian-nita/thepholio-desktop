@@ -1,7 +1,6 @@
 package org.thepholio.desktop;
 
 import javafx.application.Application;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -16,26 +15,20 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import org.thepholio.image.Images;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.Locale;
 
 import static java.lang.Double.MAX_VALUE;
-import static java.lang.String.format;
 import static javafx.scene.layout.Priority.ALWAYS;
-import static org.thepholio.image.Images.size;
-import static org.thepholio.util.Stopwatch.SW;
-import static org.thepholio.util.Utils.SAMPLES;
-import static org.thepholio.util.Utils.hrSize;
-import static org.thepholio.util.Utils.hrTime;
+import static org.thepholio.desktop.Utils.SAMPLES;
 
 /**
  * @author Octavian Theodor Nita (https://github.com/octavian-nita)
  * @version 1.0, Jan 20, 2015
  */
 public class Desktop extends Application {
+
+    private final ImageLoadingService imageLoadingService = new ImageLoadingService();
 
     private ImageView imageView = new ImageView();
 
@@ -45,35 +38,22 @@ public class Desktop extends Application {
 
     public Desktop() {
         imageView.setCache(true);
+        imageView.imageProperty().bind(imageLoadingService.imageProperty());
 
         samplesCB.setItems(SAMPLES);
         samplesCB.setMaxWidth(MAX_VALUE);
         samplesCB.setOnAction(event -> displaySelectedImage());
 
         statusBar.setId("status");
-        statusBar.setText("Found " + SAMPLES.size() + " samples.");
+        statusBar.textProperty().bind(imageLoadingService.messageProperty());
     }
 
     private void displaySelectedImage() {
 
         @SuppressWarnings("unchecked") SelectionModel<File> selection = samplesCB.getSelectionModel();
         if (!selection.isEmpty()) {
-            File file = selection.getSelectedItem();
-
-            try {
-                SW.start();
-                BufferedImage image = Images.load(file);
-                long millisLoaded = SW.stop().elapsed();
-
-                imageView.setImage(SwingFXUtils.toFXImage(image, null));
-                statusBar.setText(format(Locale.ENGLISH, "%d x %d  |  %s in memory  |  %s on disk  |  loaded in %s  ",
-                                         image.getWidth(), image.getHeight(), hrSize(size(image)),
-                                         hrSize(file.length()), hrTime(millisLoaded)));
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-                statusBar.setText("Error loading image!");
-                imageView.setImage(null);
-            }
+            imageLoadingService.setImageInput(selection.getSelectedItem());
+            imageLoadingService.restart();
         }
     }
 
