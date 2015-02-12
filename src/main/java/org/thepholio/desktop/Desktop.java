@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionModel;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -38,7 +39,6 @@ public class Desktop extends Application {
 
     public Desktop() {
         imageView.setCache(true);
-        imageView.imageProperty().bind(imageLoadingService.imageProperty());
 
         samplesCB.setItems(SAMPLES);
         samplesCB.setMaxWidth(MAX_VALUE);
@@ -46,12 +46,14 @@ public class Desktop extends Application {
 
         statusBar.setId("status");
         statusBar.textProperty().bind(imageLoadingService.messageProperty());
+        imageLoadingService.setOnSucceeded(event -> imageView.setImage((Image) event.getSource().getValue()));
     }
 
     private void displaySelectedImage() {
 
         @SuppressWarnings("unchecked") SelectionModel<File> selection = samplesCB.getSelectionModel();
         if (!selection.isEmpty()) {
+            imageView.setImage(null);
             imageLoadingService.setImageInput(selection.getSelectedItem());
             imageLoadingService.restart();
         }

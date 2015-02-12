@@ -26,7 +26,7 @@ public class ImageLoadingService extends Service<Image> {
 
     private final Stopwatch stopwatch = new Stopwatch();
 
-    private ObjectProperty<Object> imageInput = new SimpleObjectProperty<>(this, "imageInput");
+    private final ObjectProperty<Object> imageInput = new SimpleObjectProperty<>(this, "imageInput");
 
     public final ObjectProperty<Object> imageInputProperty() { return imageInput; }
 
@@ -34,30 +34,12 @@ public class ImageLoadingService extends Service<Image> {
 
     public final Object getImageInput() { return imageInput.get(); }
 
-    private ObjectProperty<Image> image = new SimpleObjectProperty<>(this, "image");
-
-    public final ObjectProperty<Image> imageProperty() { return image; }
-
-    public final void setImage(Image image) { this.image.set(image); }
-
-    public final Image getImage() { return image.get(); }
-
     @Override
     protected Task<Image> createTask() {
         return new Task<Image>() {
 
             @Override
-            protected void failed() {
-                Throwable throwable = getException();
-
-                if (throwable != null && !(throwable instanceof InterruptedException)) {
-                    updateMessage(throwable.getMessage());
-                }
-            }
-
-            @Override
             protected void scheduled() {
-                setImage(null);
                 updateMessage("");
             }
 
@@ -72,14 +54,18 @@ public class ImageLoadingService extends Service<Image> {
                 BufferedImage image = Images.load(input);
                 long millisLoaded = stopwatch.stop().elapsed();
 
-                Image fxImage = SwingFXUtils.toFXImage(image, null);
-                setImage(fxImage);
-
                 String sizeOnDisk = input instanceof File ? hrSize(((File) input).length()) + " on disk  |  " : "";
                 updateMessage(format(Locale.ENGLISH, "%d x %d  |  %s%s in memory  |  loaded in %s  ", image.getWidth(),
                                      image.getHeight(), sizeOnDisk, hrSize(size(image)), hrTime(millisLoaded)));
 
-                return fxImage;
+                return SwingFXUtils.toFXImage(image, null);
+            }
+
+            @Override
+            protected void failed() {
+                Throwable throwable = getException();
+                updateMessage(
+                    throwable != null && !(throwable instanceof InterruptedException) ? throwable.getMessage() : "");
             }
         };
     }
