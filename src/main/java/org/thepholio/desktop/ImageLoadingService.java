@@ -40,7 +40,9 @@ public class ImageLoadingService extends Service<Image> {
 
             @Override
             protected void scheduled() {
-                updateMessage("");
+                Object input = getImageInput();
+                updateMessage((input != null && input instanceof File) ? "Loading image from file " +
+                                                                         ((File) input).getAbsolutePath() + "..." : "");
             }
 
             @Override
