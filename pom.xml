@@ -5,8 +5,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.thepholio</groupId>
-  <artifactId>desktop</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <artifactId>thepholio-desktop</artifactId>
+  <version>0.1</version>
   <packaging>jar</packaging>
 
   <name>thepholio-desktop</name>
@@ -98,7 +98,7 @@
   </dependencies>
 
   <build>
-    <finalName>desktop</finalName>
+    <finalName>thepholio-desktop</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -109,7 +109,7 @@
           <target>1.8</target>
         </configuration>
       </plugin>
-      <!--plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.5</version>
@@ -119,8 +119,13 @@
           </descriptorRefs>
           <archive>
             <manifest>
-              <mainClass>org.thepholio.desktop</mainClass>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+              <mainClass>org.thepholio.desktop.Desktop</mainClass>
             </manifest>
+            <manifestEntries>
+              <Built-By>Octavian Theodor Nita (https://github.com/octavian-nita)</Built-By>
+            </manifestEntries>
           </archive>
         </configuration>
         <executions>
@@ -131,7 +136,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin-->
+      </plugin>
     </plugins>
   </build>
 </project>
