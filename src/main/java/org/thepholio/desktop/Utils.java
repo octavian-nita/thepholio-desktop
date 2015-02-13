@@ -1,15 +1,17 @@
 package org.thepholio.desktop;
 
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static java.lang.String.format;
+import static javafx.collections.FXCollections.emptyObservableList;
+import static javafx.collections.FXCollections.observableArrayList;
 
 /**
  * @author Octavian Theodor Nita (https://github.com/octavian-nita)
@@ -33,9 +35,16 @@ public class Utils {
             };
         }
 
-        return FXCollections.observableArrayList(
-            filter != null ? new File(Utils.class.getResource("/samples").getPath()).listFiles(filter)
-                           : new File(Utils.class.getResource("/samples").getPath()).listFiles());
+        try {
+            File samplesDir =
+                new File(Utils.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            samplesDir = new File(samplesDir.isFile() ? samplesDir.getParentFile() : samplesDir, "samples");
+
+            return observableArrayList(filter != null ? samplesDir.listFiles(filter) : samplesDir.listFiles());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return emptyObservableList();
+        }
     }
 
     public static String hrSize(double numBytes) {

@@ -33,7 +33,7 @@ public class Desktop extends Application {
 
     private ImageView imageView = new ImageView();
 
-    private ComboBox samplesCB = new ComboBox();
+    private ComboBox<File> samplesCB = new ComboBox<>();
 
     private Text statusBar = new Text();
 

@@ -42,7 +42,7 @@ public class Images {
             Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
             if (!readers.hasNext()) {
                 throw imageInput instanceof File ? new FormatNotSupported((File) imageInput)
-                                                 : new FormatNotSupported("Input image format not supported.");
+                                                 : new FormatNotSupported("Input image format not supported");
             }
 
             ImageReader reader = readers.next();
