@@ -11,7 +11,7 @@
       <directory>${project.basedir}/src/main/resources</directory>
       <outputDirectory>/</outputDirectory>
       <includes>
-        <include>samples/*</include>
+        <include>samples/</include>
       </includes>
     </fileSet>
     <fileSet>
