@@ -118,8 +118,9 @@
             <addMavenDescriptor>false</addMavenDescriptor>
             <manifest>
               <addClasspath>true</addClasspath>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <classpathPrefix>lib/</classpathPrefix>
               <mainClass>org.thepholio.desktop.Desktop</mainClass>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
             </manifest>
             <manifestEntries>
               <Built-By>Octavian Theodor Nita (https://github.com/octavian-nita)</Built-By>

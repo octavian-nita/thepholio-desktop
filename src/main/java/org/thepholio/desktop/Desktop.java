@@ -102,7 +102,6 @@ public class Desktop extends Application {
     }
 
     public static void main(String[] args) {
-        ImageIO.scanForPlugins();
         launch(args);
     }
 }
