@@ -17,6 +17,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 
 import static java.lang.Double.MAX_VALUE;
@@ -101,6 +102,7 @@ public class Desktop extends Application {
     }
 
     public static void main(String[] args) {
+        ImageIO.scanForPlugins();
         launch(args);
     }
 }
