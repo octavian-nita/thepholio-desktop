@@ -17,7 +17,6 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-import javax.imageio.ImageIO;
 import java.io.File;
 
 import static java.lang.Double.MAX_VALUE;
@@ -30,7 +29,7 @@ import static org.thepholio.desktop.Utils.SAMPLES;
  */
 public class Desktop extends Application {
 
-    private final ImageLoadingService imageLoadingService = new ImageLoadingService();
+    private final ImageLoadingService imageService = new ImageLoadingService();
 
     private ImageView imageView = new ImageView();
 
@@ -46,8 +45,8 @@ public class Desktop extends Application {
         samplesCB.setOnAction(event -> displaySelectedImage());
 
         statusBar.setId("status");
-        statusBar.textProperty().bind(imageLoadingService.messageProperty());
-        imageLoadingService.setOnSucceeded(event -> imageView.setImage((Image) event.getSource().getValue()));
+        statusBar.textProperty().bind(imageService.messageProperty());
+        imageService.setOnSucceeded(event -> imageView.setImage((Image) event.getSource().getValue()));
     }
 
     private void displaySelectedImage() {
@@ -55,8 +54,8 @@ public class Desktop extends Application {
         @SuppressWarnings("unchecked") SelectionModel<File> selection = samplesCB.getSelectionModel();
         if (!selection.isEmpty()) {
             imageView.setImage(null);
-            imageLoadingService.setImageInput(selection.getSelectedItem());
-            imageLoadingService.restart();
+            imageService.setImageInput(selection.getSelectedItem());
+            imageService.restart();
         }
     }
 

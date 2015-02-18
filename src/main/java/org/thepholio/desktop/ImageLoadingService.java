@@ -1,7 +1,5 @@
 package org.thepholio.desktop;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
@@ -26,13 +24,9 @@ public class ImageLoadingService extends Service<Image> {
 
     private final Stopwatch stopwatch = new Stopwatch();
 
-    private final ObjectProperty<Object> imageInput = new SimpleObjectProperty<>(this, "imageInput");
+    private Object imageInput;
 
-    public final ObjectProperty<Object> imageInputProperty() { return imageInput; }
-
-    public final void setImageInput(Object input) { imageInput.set(input); }
-
-    public final Object getImageInput() { return imageInput.get(); }
+    public void setImageInput(Object imageInput) { this.imageInput = imageInput; }
 
     @Override
     protected Task<Image> createTask() {
@@ -40,23 +34,23 @@ public class ImageLoadingService extends Service<Image> {
 
             @Override
             protected void scheduled() {
-                Object input = getImageInput();
-                updateMessage((input != null && input instanceof File) ? "Loading image from file " +
-                                                                         ((File) input).getAbsolutePath() + "..." : "");
+                updateMessage((imageInput != null && imageInput instanceof File) ? "Loading image from file " +
+                                                                                   ((File) imageInput)
+                                                                                       .getAbsolutePath() + "..." : "");
             }
 
             @Override
             protected Image call() throws Exception {
-                Object input = getImageInput();
-                if (input == null) {
+                if (imageInput == null) {
                     return null;
                 }
 
                 stopwatch.reset().start();
-                BufferedImage image = Images.load(input);
+                BufferedImage image = Images.load(imageInput);
                 long millisLoaded = stopwatch.stop().elapsed();
 
-                String sizeOnDisk = input instanceof File ? hrSize(((File) input).length()) + " on disk  |  " : "";
+                String sizeOnDisk =
+                    imageInput instanceof File ? hrSize(((File) imageInput).length()) + " on disk  |  " : "";
                 updateMessage(format(Locale.ENGLISH, "%d x %d  |  %s%s in memory  |  loaded in %s  ", image.getWidth(),
                                      image.getHeight(), sizeOnDisk, hrSize(size(image)), hrTime(millisLoaded)));
 
