@@ -11,3 +11,10 @@ goes :) ).
 ## Some notable(?) features
 
 ## Supported formats
+
+## TODO (in no particular order)
+ - add directory selection capability
+ - add fit / zoom / resize / full size capabilities
+ - add generic error notification / reporting system
+ - add extra basic metadata to the status bar (or somewhere else), especially DPI or similar
+ - create a [material design](http://www.google.com/design/spec/material-design/introduction.html)-based theme

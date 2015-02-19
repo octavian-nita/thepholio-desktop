@@ -11,3 +11,5 @@
 /nb-configuration.xml
 
 /target
+
+/*.log

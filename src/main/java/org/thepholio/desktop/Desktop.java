@@ -9,7 +9,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionModel;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -17,9 +16,18 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import static java.lang.Double.MAX_VALUE;
+import static java.lang.System.getenv;
+import static javafx.embed.swing.SwingFXUtils.toFXImage;
 import static javafx.scene.layout.Priority.ALWAYS;
 import static org.thepholio.desktop.Utils.SAMPLES;
 
@@ -29,7 +37,9 @@ import static org.thepholio.desktop.Utils.SAMPLES;
  */
 public class Desktop extends Application {
 
-    private final ImageLoadingService imageService = new ImageLoadingService();
+    private final ImageLoadingService imageLoading = new ImageLoadingService();
+
+    private final ImageFittingService imageFitting = new ImageFittingService();
 
     private ImageView imageView = new ImageView();
 
@@ -45,8 +55,16 @@ public class Desktop extends Application {
         samplesCB.setOnAction(event -> displaySelectedImage());
 
         statusBar.setId("status");
-        statusBar.textProperty().bind(imageService.messageProperty());
-        imageService.setOnSucceeded(event -> imageView.setImage((Image) event.getSource().getValue()));
+        statusBar.textProperty().bind(imageLoading.messageProperty());
+
+        imageLoading.setOnSucceeded(event -> {
+            imageFitting.setImage((BufferedImage) event.getSource().getValue());
+            imageFitting.restart();
+        });
+        imageFitting.setOnSucceeded(event -> {
+            BufferedImage image = (BufferedImage) event.getSource().getValue();
+            imageView.setImage(image == null ? null : toFXImage(image, null));
+        });
     }
 
     private void displaySelectedImage() {
@@ -54,8 +72,9 @@ public class Desktop extends Application {
         @SuppressWarnings("unchecked") SelectionModel<File> selection = samplesCB.getSelectionModel();
         if (!selection.isEmpty()) {
             imageView.setImage(null);
-            imageService.setImageInput(selection.getSelectedItem());
-            imageService.restart();
+            imageFitting.setImage(null);
+            imageLoading.setImageInput(selection.getSelectedItem());
+            imageLoading.restart();
         }
     }
 
@@ -93,7 +112,17 @@ public class Desktop extends Application {
         scroll.setPannable(true);
         scroll.setFitToWidth(true);
         scroll.setFitToHeight(true);
-        scroll.setContent(new StackPane(imageView)); // allows content aligning and also centers it by default!
+        scroll.viewportBoundsProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.equals(oldValue)) {
+                return;
+            }
+
+            imageFitting.setBounds(newValue);
+            imageFitting.restart();
+        });
+
+        // The stack pane allows content aligning and also centers it by default!
+        scroll.setContent(new StackPane(imageView));
 
         root.add(scroll, 0, 1);
         GridPane.setHgrow(scroll, ALWAYS);
@@ -101,6 +130,23 @@ public class Desktop extends Application {
     }
 
     public static void main(String[] args) {
+
+        // Set up logging to the console:
+        Logger rootLogger = Logger.getLogger("");
+        rootLogger.setLevel(getenv("DEBUG") != null ? Level.FINEST : Level.INFO);
+        rootLogger.addHandler(new ConsoleHandler());
+
+        // Set up logging to a file as well:
+        Handler fileHandler;
+        try {
+            fileHandler = new FileHandler("thepholio-desktop.log"); // a file in the current working directory
+            fileHandler.setFormatter(new SimpleFormatter());
+            rootLogger.addHandler(fileHandler);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+
+        // Launch the JavaFX app:
         launch(args);
     }
 }
