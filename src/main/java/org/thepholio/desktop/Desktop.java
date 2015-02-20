@@ -1,14 +1,19 @@
 package org.thepholio.desktop;
 
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionModel;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -16,6 +21,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.logging.ConsoleHandler;
@@ -29,6 +35,7 @@ import static java.lang.Double.MAX_VALUE;
 import static java.lang.System.getenv;
 import static javafx.embed.swing.SwingFXUtils.toFXImage;
 import static javafx.scene.layout.Priority.ALWAYS;
+import static org.thepholio.desktop.Utils.RESAMPLINGS;
 import static org.thepholio.desktop.Utils.SAMPLES;
 
 /**
@@ -68,14 +75,16 @@ public class Desktop extends Application {
     }
 
     private void displaySelectedImage() {
+        imageView.setImage(null);
+        imageFitting.setImage(null);
 
         @SuppressWarnings("unchecked") SelectionModel<File> selection = samplesCB.getSelectionModel();
-        if (!selection.isEmpty()) {
-            imageView.setImage(null);
-            imageFitting.setImage(null);
-            imageLoading.setImageInput(selection.getSelectedItem());
-            imageLoading.restart();
+        if (selection.isEmpty()) {
+            return;
         }
+
+        imageLoading.setImageInput(selection.getSelectedItem());
+        imageLoading.restart();
     }
 
     @Override
@@ -121,6 +130,26 @@ public class Desktop extends Application {
             imageFitting.restart();
         });
 
+        final ToggleGroup toggleGroup = new ToggleGroup();
+
+        ContextMenu imageContextMenu = new ContextMenu();
+        ObservableList<MenuItem> items = imageContextMenu.getItems();
+        for (String label : RESAMPLINGS.keySet()) {
+            RadioMenuItem item = new RadioMenuItem(label);
+            item.setToggleGroup(toggleGroup);
+
+            if (imageFitting.getFilter().equals(RESAMPLINGS.get(label))) {
+                item.setSelected(true);
+            }
+
+            item.setOnAction(event -> {
+                imageFitting.setFilter(RESAMPLINGS.get(item.getText()));
+                imageFitting.restart();
+            });
+            items.add(item);
+        }
+        scroll.setContextMenu(imageContextMenu);
+
         // The stack pane allows content aligning and also centers it by default!
         scroll.setContent(new StackPane(imageView));
 
@@ -145,6 +174,8 @@ public class Desktop extends Application {
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
+
+        ImageIO.setUseCache(false);
 
         // Launch the JavaFX app:
         launch(args);

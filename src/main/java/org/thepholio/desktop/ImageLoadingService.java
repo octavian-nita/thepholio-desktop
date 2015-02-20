@@ -22,6 +22,8 @@ public class ImageLoadingService extends Service<BufferedImage> {
 
     private final Stopwatch stopwatch = new Stopwatch();
 
+    private final Runtime rt = Runtime.getRuntime();
+
     private final ObjectProperty<Object> imageInput = new SimpleObjectProperty<>(this, "imageInput");
 
     public final ObjectProperty<Object> imageInputProperty() { return imageInput; }
@@ -56,8 +58,11 @@ public class ImageLoadingService extends Service<BufferedImage> {
                 updateMessage(
                     new StringBuilder().append(image.getWidth()).append(" x ").append(image.getHeight()).append("  |  ")
                                        .append(sizeOnDisk).append(hrSize(size(image)))
-                                       .append(" in memory  |  loaded in ").append(hrTime(millisLoaded)).append("  ")
-                                       .toString());
+                                       .append(" in memory  |  loaded in ").append(hrTime(millisLoaded)).append("  |  ")
+                                       .append(hrSize(rt.maxMemory() - (rt.totalMemory() - rt.freeMemory())))
+                                       .append("  memory available  ").toString());
+
+                System.gc(); // hint a garbage collection...
 
                 return image;
             }

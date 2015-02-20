@@ -1,6 +1,8 @@
 package org.thepholio.desktop;
 
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -9,13 +11,17 @@ import javafx.geometry.Bounds;
 import java.awt.image.BufferedImage;
 
 import static com.twelvemonkeys.image.ImageUtil.createResampled;
-import static com.twelvemonkeys.image.ResampleOp.FILTER_LANCZOS;
+import static com.twelvemonkeys.image.ResampleOp.FILTER_BLACKMAN_SINC;
 
 /**
  * @author Octavian Theodor Nita (https://github.com/octavian-nita)
  * @version 1.0, Feb 19, 2015
  */
 public class ImageFittingService extends Service<BufferedImage> {
+
+    //
+    // The source image property (will not be modified):
+    //
 
     private final ObjectProperty<BufferedImage> image = new SimpleObjectProperty<>(this, "image");
 
@@ -25,6 +31,10 @@ public class ImageFittingService extends Service<BufferedImage> {
 
     public final BufferedImage getImage() { return image.get(); }
 
+    //
+    // The target bounds property:
+    //
+
     private final ObjectProperty<Bounds> bounds = new SimpleObjectProperty<>(this, "bounds");
 
     public final ObjectProperty<Bounds> boundsProperty() { return bounds; }
@@ -32,6 +42,18 @@ public class ImageFittingService extends Service<BufferedImage> {
     public final void setBounds(Bounds bounds) { this.bounds.set(bounds); }
 
     public final Bounds getBounds() { return bounds.get(); }
+
+    //
+    // The resampling filter property:
+    //
+
+    private final IntegerProperty filter = new SimpleIntegerProperty(this, "filter", FILTER_BLACKMAN_SINC);
+
+    public final IntegerProperty filterProperty() { return filter; }
+
+    public final void setFilter(Integer filter) { this.filter.set(filter); }
+
+    public final Integer getFilter() { return filter.get(); }
 
     @Override
     protected Task<BufferedImage> createTask() {
@@ -51,16 +73,16 @@ public class ImageFittingService extends Service<BufferedImage> {
 
                 double iW = image.getWidth(), iH = image.getHeight(), bW = bounds.getWidth(), bH = bounds.getHeight();
 
-                if (iW > bW || iH > bH) {
+                if (bH < iH || bW < iW) {
                     double ratio = iW / iH;
 
-                    if (bW < bH) { // keep width, re-compute height
-                        bH = bW / ratio;
-                    } else { // keep height, re-compute width
-                        bW = bH * ratio;
+                    if (bH > bW) {
+                        bH = bW / ratio; // keep width, re-compute height
+                    } else {
+                        bW = bH * ratio; // keep height, re-compute width
                     }
 
-                    return createResampled(image, (int) bW, (int) bH, FILTER_LANCZOS);
+                    return createResampled(image, (int) bW, (int) bH, getFilter().intValue());
                 } else {
                     return image;
                 }

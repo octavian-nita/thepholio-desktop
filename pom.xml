@@ -95,6 +95,11 @@
       <artifactId>imageio-sgi</artifactId>
       <version>${twelvemonkeys.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.mortennobel</groupId>
+      <artifactId>java-image-scaling</artifactId>
+      <version>0.8.6</version>
+    </dependency>
   </dependencies>
 
   <build>
