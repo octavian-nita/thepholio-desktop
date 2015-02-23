@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage;
 
 import static com.twelvemonkeys.image.ImageUtil.createResampled;
 import static com.twelvemonkeys.image.ResampleOp.FILTER_BLACKMAN_SINC;
+import static java.lang.Math.round;
 
 /**
  * @author Octavian Theodor Nita (https://github.com/octavian-nita)
@@ -71,8 +72,9 @@ public class ImageFittingService extends Service<BufferedImage> {
                     return null;
                 }
 
-                double iW = image.getWidth(), iH = image.getHeight(), bW = bounds.getWidth(), bH = bounds.getHeight();
+                int filter = getFilter();
 
+                double iW = image.getWidth(), iH = image.getHeight(), bW = bounds.getWidth(), bH = bounds.getHeight();
                 if (bH < iH || bW < iW) {
                     double ratio = iW / iH;
 
@@ -82,10 +84,17 @@ public class ImageFittingService extends Service<BufferedImage> {
                         bW = bH * ratio; // keep height, re-compute width
                     }
 
-                    return createResampled(image, (int) bW, (int) bH, getFilter().intValue());
-                } else {
-                    return image;
+                    int iterations = (int) (round(iH / bH)) - 1;
+                    if (iterations > 3) {
+                        iterations = 3;
+                    }
+
+                    for (; iterations > 0; --iterations) {
+                        image = createResampled(image, iterations * (int) bW, iterations * (int) bH, filter);
+                    }
                 }
+
+                return image;
             }
 
             @Override
