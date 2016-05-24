@@ -5,6 +5,7 @@
 
 #status, .text {
   -fx-fill: #a1a1a1;
+  /*noinspection CssInvalidFunction*/
   -fx-effect: innershadow(three-pass-box, rgba(0, 0, 0, 0.8), 6, 0, 0, 2);
 }
 

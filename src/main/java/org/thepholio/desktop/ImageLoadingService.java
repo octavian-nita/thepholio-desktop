@@ -4,7 +4,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import org.thepholio.Stopwatch;
+import org.thepholio.util.Stopwatch;
 import org.thepholio.image.Images;
 
 import java.awt.image.BufferedImage;

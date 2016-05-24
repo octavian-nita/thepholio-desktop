@@ -1,4 +1,4 @@
-package org.thepholio;
+package org.thepholio.util;
 
 /**
  * @author Octavian Theodor Nita (https://github.com/octavian-nita)

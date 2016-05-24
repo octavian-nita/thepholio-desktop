@@ -1,6 +1,6 @@
 package org.thepholio.image;
 
-import org.thepholio.FormatNotSupported;
+import org.thepholio.util.FormatNotSupported;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;

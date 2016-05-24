@@ -1,4 +1,4 @@
-package org.thepholio;
+package org.thepholio.util;
 
 import java.io.File;
 
